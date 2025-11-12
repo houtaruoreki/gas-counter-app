@@ -61,14 +61,18 @@ public partial class AddCounterPage : ContentPage
 
             var counterId = string.IsNullOrWhiteSpace(CounterIdEntry.Text) ? null : CounterIdEntry.Text.Trim();
 
-            // Check for unique Counter ID if provided
+            // Check for unique Counter ID if provided (case-insensitive)
             if (!string.IsNullOrWhiteSpace(counterId))
             {
                 var isUnique = await _databaseService.IsCounterIdUniqueAsync(counterId);
                 if (!isUnique)
                 {
-                    await DisplayAlert("შეცდომა", $"მრიცხველის ID '{counterId}' უკვე არსებობს. გთხოვთ გამოიყენოთ უნიკალური ID.", "OK");
+                    await DisplayAlert(
+                        "შეცდომა",
+                        $"მრიცხველის ID '{counterId}' უკვე არსებობს ბაზაში!\n\nგთხოვთ გამოიყენოთ უნიკალური ID.",
+                        "OK");
                     SaveButton.IsEnabled = true;
+                    CounterIdEntry.Focus(); // Focus back on the ID field
                     return;
                 }
             }

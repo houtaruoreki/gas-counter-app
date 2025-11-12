@@ -51,9 +51,16 @@ public class DatabaseService
         if (string.IsNullOrWhiteSpace(counterId))
             return true; // Empty IDs are allowed (optional field)
 
-        var existing = await _database!.Table<GasCounter>()
-            .Where(c => c.CounterId == counterId && c.Id != excludeId)
-            .CountAsync();
+        // Get all counters and do case-insensitive comparison in memory
+        // SQLite's collation can be inconsistent across platforms
+        var allCounters = await _database!.Table<GasCounter>()
+            .Where(c => c.CounterId != null)
+            .ToListAsync();
+
+        var existing = allCounters
+            .Where(c => c.Id != excludeId &&
+                        string.Equals(c.CounterId, counterId, StringComparison.OrdinalIgnoreCase))
+            .Count();
 
         return existing == 0;
     }
