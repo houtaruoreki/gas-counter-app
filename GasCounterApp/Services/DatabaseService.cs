@@ -44,6 +44,20 @@ public class DatabaseService
             .ToListAsync();
     }
 
+    public async Task<bool> IsCounterIdUniqueAsync(string counterId, int excludeId = 0)
+    {
+        await InitializeAsync();
+
+        if (string.IsNullOrWhiteSpace(counterId))
+            return true; // Empty IDs are allowed (optional field)
+
+        var existing = await _database!.Table<GasCounter>()
+            .Where(c => c.CounterId == counterId && c.Id != excludeId)
+            .CountAsync();
+
+        return existing == 0;
+    }
+
     public async Task<int> SaveCounterAsync(GasCounter counter)
     {
         await InitializeAsync();

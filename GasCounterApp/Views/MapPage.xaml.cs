@@ -51,6 +51,9 @@ public partial class MapPage : ContentPage
 
         // Start location updates after initial load
         await StartLocationUpdatesAsync();
+
+        // Auto-recenter to user's location when opening the app
+        await RecenterToUserLocationAsync();
     }
 
     protected override void OnDisappearing()
@@ -233,6 +236,11 @@ public partial class MapPage : ContentPage
 
     private async void OnMyLocationClicked(object sender, EventArgs e)
     {
+        await RecenterToUserLocationAsync();
+    }
+
+    private async Task RecenterToUserLocationAsync()
+    {
         var (location, _) = await _locationService.GetCurrentLocationAsync();
 
         if (location != null)
@@ -251,7 +259,25 @@ public partial class MapPage : ContentPage
     {
         try
         {
-            var (location, accuracy) = await _locationService.GetCurrentLocationAsync();
+            // Show loading state immediately
+            LoadingIndicator.IsVisible = true;
+            LoadingIndicator.IsRunning = true;
+
+            // Try to use last known location first for faster response
+            var (lastLocation, lastAccuracy) = _locationService.GetLastKnownLocation();
+
+            MauiLocation? location = lastLocation;
+            double? accuracy = lastAccuracy;
+
+            // If no recent location, get fresh GPS fix
+            if (location == null)
+            {
+                (location, accuracy) = await _locationService.GetCurrentLocationAsync();
+            }
+
+            // Hide loading
+            LoadingIndicator.IsVisible = false;
+            LoadingIndicator.IsRunning = false;
 
             if (location == null)
             {
@@ -287,6 +313,10 @@ public partial class MapPage : ContentPage
         }
         catch (Exception ex)
         {
+            // Hide loading on error
+            LoadingIndicator.IsVisible = false;
+            LoadingIndicator.IsRunning = false;
+
             await DisplayAlert("შეცდომა", $"დაფიქსირდა შეცდომა: {ex.Message}", "OK");
         }
     }

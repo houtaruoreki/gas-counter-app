@@ -111,11 +111,25 @@ public partial class CounterDetailPage : ContentPage
         {
             SaveButton.IsEnabled = false;
 
-            _counter.CounterId = string.IsNullOrWhiteSpace(CounterIdEntry.Text) ? null : CounterIdEntry.Text;
-            _counter.CustomerName = string.IsNullOrWhiteSpace(CustomerNameEntry.Text) ? null : CustomerNameEntry.Text;
-            _counter.StreetName = string.IsNullOrWhiteSpace(StreetNameEntry.Text) ? null : StreetNameEntry.Text;
+            var counterId = string.IsNullOrWhiteSpace(CounterIdEntry.Text) ? null : CounterIdEntry.Text.Trim();
+
+            // Check for unique Counter ID if provided and changed
+            if (!string.IsNullOrWhiteSpace(counterId) && counterId != _counter.CounterId)
+            {
+                var isUnique = await _databaseService.IsCounterIdUniqueAsync(counterId, _counter.Id);
+                if (!isUnique)
+                {
+                    await DisplayAlert("შეცდომა", $"მრიცხველის ID '{counterId}' უკვე არსებობს. გთხოვთ გამოიყენოთ უნიკალური ID.", "OK");
+                    SaveButton.IsEnabled = true;
+                    return;
+                }
+            }
+
+            _counter.CounterId = counterId;
+            _counter.CustomerName = string.IsNullOrWhiteSpace(CustomerNameEntry.Text) ? null : CustomerNameEntry.Text.Trim();
+            _counter.StreetName = string.IsNullOrWhiteSpace(StreetNameEntry.Text) ? null : StreetNameEntry.Text.Trim();
             _counter.State = StatePicker.SelectedIndex >= 0 ? StatePicker.Items[StatePicker.SelectedIndex] : null;
-            _counter.Notes = string.IsNullOrWhiteSpace(NotesEditor.Text) ? null : NotesEditor.Text;
+            _counter.Notes = string.IsNullOrWhiteSpace(NotesEditor.Text) ? null : NotesEditor.Text.Trim();
 
             await _databaseService.SaveCounterAsync(_counter);
 
