@@ -1,3 +1,4 @@
+using System.Linq;
 using Mapsui;
 using Mapsui.Extensions;
 using Mapsui.Layers;
@@ -91,15 +92,24 @@ public partial class MapPage : ContentPage
         MapView.Info += OnMapInfo;
     }
 
-    private async void OnMapInfo(object? sender, Mapsui.UI.MapInfoEventArgs e)
+    private async void OnMapInfo(object? sender, Mapsui.UI.Maui.MapClickedEventArgs e)
     {
-        if (e.MapInfo?.Feature == null)
+        // Get features at tap location
+        var screenPosition = e.Point;
+        var worldPosition = MapView.Map.Navigator.Viewport.ScreenToWorld(screenPosition.X, screenPosition.Y);
+
+        // Find features near the tap location
+        var features = MapView.Map.Layers
+            .SelectMany(layer => layer.GetFeatures(worldPosition.ToMRect(10), MapView.Map.Navigator.Viewport.Resolution))
+            .Where(f => f != null)
+            .ToList();
+
+        if (!features.Any())
             return;
 
-        var feature = e.MapInfo.Feature;
-
         // Check if this is a counter feature
-        if (feature["CounterId"] is int counterId)
+        var counterFeature = features.FirstOrDefault(f => f["CounterId"] != null);
+        if (counterFeature != null && counterFeature["CounterId"] is int counterId)
         {
             var counter = await _databaseService.GetCounterByIdAsync(counterId);
             if (counter != null)
