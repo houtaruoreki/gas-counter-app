@@ -12,12 +12,12 @@ public partial class DashboardPage : ContentPage
 
     public event EventHandler? CountersUpdated;
 
-    public DashboardPage()
+    public DashboardPage(DatabaseService databaseService, BackupService backupService)
     {
         InitializeComponent();
 
-        _databaseService = new DatabaseService();
-        _backupService = new BackupService(_databaseService);
+        _databaseService = databaseService;
+        _backupService = backupService;
         _searchResults = new ObservableCollection<GasCounter>();
 
         SearchResultsView.ItemsSource = _searchResults;
@@ -79,17 +79,23 @@ public partial class DashboardPage : ContentPage
     {
         try
         {
-            _searchResults.Clear();
+            var searchText = e.NewTextValue;
 
-            if (string.IsNullOrWhiteSpace(e.NewTextValue))
-                return;
-
-            var results = await _databaseService.SearchCountersByIdAsync(e.NewTextValue);
-
-            foreach (var counter in results)
+            // Ensure UI updates happen on main thread
+            await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                _searchResults.Add(counter);
-            }
+                _searchResults.Clear();
+
+                if (string.IsNullOrWhiteSpace(searchText))
+                    return;
+
+                var results = await _databaseService.SearchCountersByIdAsync(searchText);
+
+                foreach (var counter in results)
+                {
+                    _searchResults.Add(counter);
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -101,7 +107,7 @@ public partial class DashboardPage : ContentPage
     {
         if (e.CurrentSelection.FirstOrDefault() is GasCounter counter)
         {
-            var detailPage = new CounterDetailPage(counter.Id);
+            var detailPage = new CounterDetailPage(_databaseService, counter.Id);
             detailPage.CounterUpdated += (s, e) =>
             {
                 CountersUpdated?.Invoke(this, EventArgs.Empty);

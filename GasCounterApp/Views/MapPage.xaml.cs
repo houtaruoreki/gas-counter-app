@@ -22,16 +22,17 @@ public partial class MapPage : ContentPage
     private readonly LocationService _locationService;
     private readonly BackupService _backupService;
     private WritableLayer? _countersLayer;
+    private WritableLayer? _currentLocationLayer;
     private CancellationTokenSource? _locationUpdatesCts;
     private bool _hasAutocentered = false;
 
-    public MapPage()
+    public MapPage(DatabaseService databaseService, LocationService locationService, BackupService backupService)
     {
         InitializeComponent();
 
-        _databaseService = new DatabaseService();
-        _locationService = new LocationService();
-        _backupService = new BackupService(_databaseService);
+        _databaseService = databaseService;
+        _locationService = locationService;
+        _backupService = backupService;
 
         InitializeMap();
     }
@@ -39,12 +40,16 @@ public partial class MapPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await LoadCountersAsync();
-        await StartLocationUpdatesAsync();
-        await UpdateStatsAsync();
 
-        // Perform daily backup check
-        await CheckAndPerformBackupAsync();
+        // Run independent operations in parallel for faster loading
+        var loadCountersTask = LoadCountersAsync();
+        var updateStatsTask = UpdateStatsAsync();
+        var backupCheckTask = CheckAndPerformBackupAsync();
+
+        await Task.WhenAll(loadCountersTask, updateStatsTask, backupCheckTask);
+
+        // Start location updates after initial load
+        await StartLocationUpdatesAsync();
     }
 
     protected override void OnDisappearing()
@@ -68,24 +73,40 @@ public partial class MapPage : ContentPage
         };
         map.Layers.Add(_countersLayer);
 
+        // Create layer for current location marker
+        _currentLocationLayer = new WritableLayer
+        {
+            Name = "CurrentLocation",
+            Style = null
+        };
+        map.Layers.Add(_currentLocationLayer);
+
         MapView.Map = map;
 
         // Set initial center (Ozurgeti, Georgia) after map is assigned
         var centerPoint = SphericalMercator.FromLonLat(42.0041, 41.9245);
         MapView.Map.Navigator.CenterOnAndZoomTo(centerPoint.ToMPoint(), MapView.Map.Navigator.Resolutions[14]);
 
-        // Handle map taps - using TapGestureRecognizer since MapClicked event might not be available
-        var tapGestureRecognizer = new TapGestureRecognizer();
-        tapGestureRecognizer.Tapped += OnMapTapped;
-        MapView.GestureRecognizers.Add(tapGestureRecognizer);
+        // Handle map info/tap events for features
+        MapView.Info += OnMapInfo;
     }
 
-    private async void OnMapTapped(object? sender, TappedEventArgs e)
+    private async void OnMapInfo(object? sender, Mapsui.UI.MapInfoEventArgs e)
     {
-        // For now, we'll show a simple message
-        // Full implementation would require converting tap coordinates to map coordinates
-        // and finding nearest counter
-        await DisplayAlert("ინფორმაცია", "შეეხეთ მრიცხველს უფრო ახლოს დეტალების სანახავად", "OK");
+        if (e.MapInfo?.Feature == null)
+            return;
+
+        var feature = e.MapInfo.Feature;
+
+        // Check if this is a counter feature
+        if (feature["CounterId"] is int counterId)
+        {
+            var counter = await _databaseService.GetCounterByIdAsync(counterId);
+            if (counter != null)
+            {
+                await ShowCounterPopupAsync(counter);
+            }
+        }
     }
 
     private async Task LoadCountersAsync()
@@ -143,13 +164,12 @@ public partial class MapPage : ContentPage
     {
         _locationUpdatesCts = new CancellationTokenSource();
 
-        try
+        // Use the refactored LocationService with cancellation token
+        _ = Task.Run(async () =>
         {
-            while (!_locationUpdatesCts.Token.IsCancellationRequested)
+            await _locationService.StartListeningAsync((location, accuracy) =>
             {
-                var (location, accuracy) = await _locationService.GetCurrentLocationAsync();
-
-                if (location != null)
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
                     var accuracyText = _locationService.GetAccuracyDescription(accuracy);
                     AccuracyLabel.Text = $"GPS: {accuracyText}";
@@ -162,18 +182,44 @@ public partial class MapPage : ContentPage
                         MapView.Map?.Navigator.CenterOnAndZoomTo(point.ToMPoint(), MapView.Map.Navigator.Resolutions[16]);
                         MapView.Refresh();
                     }
-                }
-                else
-                {
-                    AccuracyLabel.Text = "GPS: მიუწვდომელი";
-                }
 
-                await Task.Delay(3000, _locationUpdatesCts.Token);
-            }
-        }
-        catch (TaskCanceledException)
+                    // Update current location marker
+                    UpdateCurrentLocationMarker(location);
+                });
+            }, _locationUpdatesCts.Token);
+        }, _locationUpdatesCts.Token);
+
+        await Task.CompletedTask;
+    }
+
+    private void UpdateCurrentLocationMarker(MauiLocation location)
+    {
+        if (_currentLocationLayer == null)
+            return;
+
+        try
         {
-            // Expected when stopping
+            // Clear previous location marker
+            _currentLocationLayer.Clear();
+
+            // Add new current location marker
+            var point = SphericalMercator.FromLonLat(location.Longitude, location.Latitude);
+            var feature = new PointFeature(point.ToMPoint());
+
+            // Style as a blue circle with white border to distinguish from counter pins
+            feature.Styles.Add(new Mapsui.Styles.SymbolStyle
+            {
+                SymbolScale = 1.0,
+                Fill = new MapsuiBrush(Mapsui.Styles.Color.FromString("Blue")),
+                Outline = new Mapsui.Styles.Pen(Mapsui.Styles.Color.White, 3)
+            });
+
+            _currentLocationLayer.Add(feature);
+            MapView.Refresh();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating location marker: {ex.Message}");
         }
     }
 
@@ -222,7 +268,7 @@ public partial class MapPage : ContentPage
                 return;
             }
 
-            var addPage = new AddCounterPage(location.Latitude, location.Longitude, accuracy);
+            var addPage = new AddCounterPage(_databaseService, location.Latitude, location.Longitude, accuracy);
             addPage.CounterSaved += async (s, counter) =>
             {
                 await LoadCountersAsync();
@@ -248,7 +294,7 @@ public partial class MapPage : ContentPage
     {
         try
         {
-            var dashboardPage = new DashboardPage();
+            var dashboardPage = new DashboardPage(_databaseService, _backupService);
             dashboardPage.CountersUpdated += async (s, e) =>
             {
                 await LoadCountersAsync();
@@ -292,7 +338,7 @@ public partial class MapPage : ContentPage
                 break;
 
             case "დეტალები":
-                var detailPage = new CounterDetailPage(counter.Id);
+                var detailPage = new CounterDetailPage(_databaseService, counter.Id);
                 detailPage.CounterUpdated += async (s, e) =>
                 {
                     await LoadCountersAsync();

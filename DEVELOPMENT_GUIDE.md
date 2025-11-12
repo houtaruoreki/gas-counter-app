@@ -316,28 +316,278 @@ dotnet build -f net9.0-android -c Release
 dotnet publish -f net9.0-android -c Release
 ```
 
-### Installing on Device
+### Installing on Device via ADB
 
-**Method 1: Via ADB**
+#### Prerequisites
+1. **Enable Developer Options** on your Android device:
+   - Go to Settings > About Phone
+   - Tap "Build Number" 7 times
+   - Developer Options will appear in Settings
+
+2. **Enable USB Debugging**:
+   - Go to Settings > Developer Options
+   - Enable "USB Debugging"
+   - Connect device via USB
+   - Accept the "Allow USB debugging" prompt on device
+
+3. **Install ADB Tools** (if not already installed):
+   - **Windows**: Download platform-tools from https://developer.android.com/tools/releases/platform-tools
+   - **Mac/Linux**: `brew install android-platform-tools` or similar
+   - Add ADB to your PATH environment variable
+
+#### Method 1: Direct ADB Installation (Recommended)
+
+**Step 1: Verify Device Connection**
 ```bash
-# Check device connection
+# List connected devices
 adb devices
 
-# Install APK
-adb install bin/Release/net9.0-android/com.gascounter.app-Signed.apk
-
-# Reinstall (if app already exists)
-adb install -r bin/Release/net9.0-android/com.gascounter.app-Signed.apk
-
-# Uninstall
-adb uninstall com.gascounter.app
+# Expected output:
+# List of devices attached
+# ABC123XYZ    device
 ```
 
-**Method 2: Manual Transfer**
-1. Copy `com.gascounter.app-Signed.apk` to phone
-2. Enable "Install from Unknown Sources" in Settings
-3. Tap APK file on phone
-4. Install
+If you see "unauthorized", check your phone for the USB debugging authorization prompt.
+
+**Step 2: Build the APK**
+```bash
+# Navigate to project root
+cd /home/user/gas-counter-app
+
+# Clean previous builds (optional)
+dotnet clean
+
+# Build Release APK
+dotnet build -f net9.0-android -c Release
+
+# The APK will be created at:
+# GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk
+```
+
+**Step 3: Install APK**
+```bash
+# Fresh install (if app not already installed)
+adb install "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+
+# Reinstall (keeps app data - recommended for updates)
+adb install -r "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+
+# Force reinstall (removes app data - clean install)
+adb install -r -d "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+```
+
+**Step 4: Launch App**
+```bash
+# Launch app immediately after installation
+adb shell am start -n com.gascounter.app/crc64e39b72f7d7f6e83e.MainActivity
+
+# Or manually tap the "Gas Counter" icon on device
+```
+
+#### Method 2: Build and Install in One Command
+
+For convenience, create a script to build and install:
+
+**Windows (PowerShell):**
+```powershell
+# build-and-install.ps1
+dotnet clean
+dotnet build -f net9.0-android -c Release
+$apkPath = "GasCounterApp\bin\Release\net9.0-android\com.gascounter.app-Signed.apk"
+adb install -r $apkPath
+adb shell am start -n com.gascounter.app/crc64e39b72f7d7f6e83e.MainActivity
+Write-Host "App installed and launched successfully!"
+```
+
+**Linux/Mac (Bash):**
+```bash
+#!/bin/bash
+# build-and-install.sh
+dotnet clean
+dotnet build -f net9.0-android -c Release
+APK_PATH="GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+adb install -r "$APK_PATH"
+adb shell am start -n com.gascounter.app/crc64e39b72f7d7f6e83e.MainActivity
+echo "App installed and launched successfully!"
+```
+
+#### Method 3: Install Over WiFi (Wireless ADB)
+
+**Step 1: Connect Device via USB first**
+```bash
+# Enable TCP/IP mode on port 5555
+adb tcpip 5555
+
+# Get device IP address
+adb shell ip addr show wlan0 | grep "inet "
+# Note the IP address (e.g., 192.168.1.100)
+```
+
+**Step 2: Disconnect USB and Connect via WiFi**
+```bash
+# Replace with your device's IP
+adb connect 192.168.1.100:5555
+
+# Verify connection
+adb devices
+# Should show: 192.168.1.100:5555    device
+
+# Now use regular adb commands wirelessly
+adb install -r "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+```
+
+**Step 3: Return to USB Mode**
+```bash
+adb usb
+```
+
+#### Method 4: Manual Transfer to Device
+
+If ADB is not available:
+
+1. **Copy APK to Device**:
+   - Connect device via USB as file transfer device
+   - Copy `com.gascounter.app-Signed.apk` to Downloads folder
+   - Or email/cloud share the APK to yourself
+
+2. **Enable Unknown Sources**:
+   - Settings > Security > Install Unknown Apps
+   - Enable for your file manager or browser
+
+3. **Install from Device**:
+   - Open Files/Downloads app
+   - Tap the APK file
+   - Tap "Install"
+   - Tap "Open" to launch
+
+#### Useful ADB Commands
+
+**Device Management:**
+```bash
+# List all connected devices
+adb devices -l
+
+# Get device info
+adb shell getprop ro.build.version.release  # Android version
+adb shell getprop ro.product.model          # Device model
+
+# Reboot device
+adb reboot
+```
+
+**App Management:**
+```bash
+# Check if app is installed
+adb shell pm list packages | grep com.gascounter.app
+
+# Get app version
+adb shell dumpsys package com.gascounter.app | grep versionName
+
+# Uninstall app
+adb uninstall com.gascounter.app
+
+# Uninstall but keep data
+adb uninstall -k com.gascounter.app
+
+# Clear app data without uninstalling
+adb shell pm clear com.gascounter.app
+```
+
+**Logging & Debugging:**
+```bash
+# View real-time logs (all)
+adb logcat
+
+# View only errors
+adb logcat *:E
+
+# Filter for your app
+adb logcat | grep -i "gascounter"
+
+# Save logs to file
+adb logcat -d > logcat.txt
+
+# Clear log buffer
+adb logcat -c
+```
+
+**File Access:**
+```bash
+# Access app's internal storage
+adb shell run-as com.gascounter.app
+
+# Pull database file to computer (requires root or debug build)
+adb shell run-as com.gascounter.app cp /data/user/0/com.gascounter.app/files/gascounters.db3 /sdcard/
+adb pull /sdcard/gascounters.db3
+
+# Push database back to device
+adb push gascounters.db3 /sdcard/
+adb shell run-as com.gascounter.app cp /sdcard/gascounters.db3 /data/user/0/com.gascounter.app/files/
+```
+
+**Screenshots & Screen Recording:**
+```bash
+# Take screenshot
+adb shell screencap /sdcard/screenshot.png
+adb pull /sdcard/screenshot.png
+
+# Record screen (Ctrl+C to stop)
+adb shell screenrecord /sdcard/demo.mp4
+adb pull /sdcard/demo.mp4
+```
+
+#### Troubleshooting ADB Installation
+
+**Problem: "adb: command not found"**
+```bash
+# Windows: Add to PATH
+setx PATH "%PATH%;C:\path\to\platform-tools"
+
+# Mac/Linux: Add to ~/.bashrc or ~/.zshrc
+export PATH="$PATH:/path/to/platform-tools"
+```
+
+**Problem: "device unauthorized"**
+```bash
+# Disconnect and reconnect USB cable
+# Check phone for authorization dialog
+# If still fails, revoke all USB debugging authorizations in Developer Options
+# Then reconnect and reauthorize
+```
+
+**Problem: "device offline"**
+```bash
+adb kill-server
+adb start-server
+adb devices
+```
+
+**Problem: "INSTALL_FAILED_UPDATE_INCOMPATIBLE"**
+```bash
+# App signature mismatch - uninstall first
+adb uninstall com.gascounter.app
+adb install "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+```
+
+**Problem: "INSTALL_FAILED_INSUFFICIENT_STORAGE"**
+```bash
+# Check available space
+adb shell df /data
+
+# Free up space or uninstall other apps
+adb shell pm list packages
+adb uninstall <package.name>
+```
+
+**Problem: Multiple devices connected**
+```bash
+# Specify device by serial number
+adb -s ABC123XYZ install -r "path/to/apk"
+
+# Or use USB/TCP to specify
+adb -d install -r "path/to/apk"  # USB device
+adb -e install -r "path/to/apk"  # Emulator
+```
 
 ### First Run Setup
 

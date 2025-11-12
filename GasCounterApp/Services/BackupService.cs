@@ -21,25 +21,44 @@ public class BackupService
     {
         try
         {
-            var dbPath = await _databaseService.GetDatabasePathAsync();
+            // Close the database connection to unlock the file
+            await _databaseService.CloseDatabaseAsync();
+
+            var dbPath = _databaseService.GetDatabasePath();
 
             if (!File.Exists(dbPath))
+            {
+                // Reinitialize database
+                await _databaseService.GetAllCountersAsync();
                 return false;
+            }
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var backupFileName = $"gascounters_backup_{timestamp}.db3";
             var backupPath = Path.Combine(_backupDirectory, backupFileName);
+
+            // Wait a moment for file handles to release
+            await Task.Delay(100);
 
             File.Copy(dbPath, backupPath, true);
 
             // Keep only last 7 backups
             await CleanOldBackupsAsync(7);
 
+            // Reinitialize database connection
+            await _databaseService.GetAllCountersAsync();
+
             return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Backup failed: {ex.Message}");
+            // Ensure database is reinitialized even on error
+            try
+            {
+                await _databaseService.GetAllCountersAsync();
+            }
+            catch { }
             return false;
         }
     }
@@ -53,7 +72,10 @@ public class BackupService
             if (!File.Exists(backupPath))
                 return false;
 
-            var dbPath = await _databaseService.GetDatabasePathAsync();
+            // Close the database connection to unlock the file
+            await _databaseService.CloseDatabaseAsync();
+
+            var dbPath = _databaseService.GetDatabasePath();
 
             // Create a temporary backup of current database
             var tempBackupPath = dbPath + ".temp";
@@ -64,6 +86,9 @@ public class BackupService
 
             try
             {
+                // Wait for file handles to release
+                await Task.Delay(100);
+
                 File.Copy(backupPath, dbPath, true);
 
                 // Delete temporary backup on success
@@ -71,6 +96,9 @@ public class BackupService
                 {
                     File.Delete(tempBackupPath);
                 }
+
+                // Reinitialize database connection
+                await _databaseService.GetAllCountersAsync();
 
                 return true;
             }
@@ -82,6 +110,14 @@ public class BackupService
                     File.Copy(tempBackupPath, dbPath, true);
                     File.Delete(tempBackupPath);
                 }
+
+                // Reinitialize database
+                try
+                {
+                    await _databaseService.GetAllCountersAsync();
+                }
+                catch { }
+
                 throw;
             }
         }
