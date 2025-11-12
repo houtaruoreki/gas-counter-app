@@ -63,10 +63,10 @@ public partial class MapPickerPage : ContentPage
         var centerY = viewport.CenterY;
 
         // Convert from Spherical Mercator to WGS84
-        var lonLat = SphericalMercator.ToLonLat(centerX, centerY);
+        var (lon, lat) = SphericalMercator.ToLonLat(centerX, centerY);
 
-        _selectedLongitude = lonLat.x;
-        _selectedLatitude = lonLat.y;
+        _selectedLongitude = lon;
+        _selectedLatitude = lat;
 
         // Update the label
         CoordinatesLabel.Text = $"გრძედი: {_selectedLatitude:F6}, განედი: {_selectedLongitude:F6}";
