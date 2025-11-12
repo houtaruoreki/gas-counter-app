@@ -8,10 +8,13 @@
         <VerticalStackLayout Padding="20" Spacing="20">
 
             <!-- Statistics Card -->
-            <Frame BorderColor="{DynamicResource Primary}"
-                   CornerRadius="15"
-                   Padding="20"
-                   HasShadow="True">
+            <Border Stroke="{DynamicResource Primary}"
+                    StrokeThickness="2"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15"/>
+                </Border.StrokeShape>
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
                     <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                            Text="სტატისტიკა"
@@ -50,13 +53,16 @@
                            TextColor="Red"
                            HorizontalOptions="End"/>
                 </Grid>
-            </Frame>
+            </Border>
 
             <!-- Search Section -->
-            <Frame BorderColor="LightGray"
-                   CornerRadius="15"
-                   Padding="20"
-                   HasShadow="True">
+            <Border Stroke="LightGray"
+                    StrokeThickness="2"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15"/>
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="10">
                     <Label Text="ძებნა ID-ით"
                            FontSize="18"
@@ -80,15 +86,17 @@
                         </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <Frame Padding="10"
-                                       Margin="0,5"
-                                       CornerRadius="10"
-                                       HasShadow="False"
-                                       BorderColor="LightGray"
-                                       BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
-                                    <Frame.GestureRecognizers>
+                                <Border Padding="10"
+                                        Margin="0,5"
+                                        Stroke="LightGray"
+                                        StrokeThickness="1"
+                                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10"/>
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnSearchResultTapped" />
-                                    </Frame.GestureRecognizers>
+                                    </Border.GestureRecognizers>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="3">
                                             <Label Text="{Binding CounterId, StringFormat='ID: {0}'}"
@@ -105,18 +113,21 @@
                                                FontSize="24"
                                                VerticalOptions="Center"/>
                                     </Grid>
-                                </Frame>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Cycle Management Section -->
-            <Frame BorderColor="Orange"
-                   CornerRadius="15"
-                   Padding="20"
-                   HasShadow="True">
+            <Border Stroke="Orange"
+                    StrokeThickness="2"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15"/>
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="10">
                     <Label Text="შემოწმების ციკლი"
                            FontSize="18"
@@ -142,13 +153,16 @@
                            TextColor="Red"
                            HorizontalTextAlignment="Center"/>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Backup Section -->
-            <Frame BorderColor="Purple"
-                   CornerRadius="15"
-                   Padding="20"
-                   HasShadow="True">
+            <Border Stroke="Purple"
+                    StrokeThickness="2"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15"/>
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="10">
                     <Label Text="სარეზერვო კოპია"
                            FontSize="18"
@@ -183,7 +197,7 @@
                                 Clicked="OnViewBackupsClicked"/>
                     </Grid>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
         </VerticalStackLayout>
     </ScrollView>
