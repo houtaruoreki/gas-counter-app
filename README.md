@@ -90,19 +90,51 @@ cd gas-counter-app
 # Restore dependencies
 dotnet restore
 
-# Build for Android
+# Build for Android (Release)
 dotnet build -f net9.0-android -c Release
 
-# Install on connected device
-adb install -r "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+# The APK will be at:
+# GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk
 ```
+
+### Installing via ADB
+
+**Prerequisites:**
+1. Enable Developer Options on your device (Settings > About Phone > tap "Build Number" 7 times)
+2. Enable USB Debugging (Settings > Developer Options)
+3. Install ADB tools: https://developer.android.com/tools/releases/platform-tools
+
+**Quick Install:**
+```bash
+# Check device connection
+adb devices
+
+# Install or update app
+adb install -r "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk"
+
+# Launch app
+adb shell am start -n com.gascounter.app/crc64e39b72f7d7f6e83e.MainActivity
+```
+
+**Build and Install Script:**
+```bash
+# Create a script for one-command deployment:
+dotnet build -f net9.0-android -c Release && \
+adb install -r "GasCounterApp/bin/Release/net9.0-android/com.gascounter.app-Signed.apk" && \
+adb shell am start -n com.gascounter.app/crc64e39b72f7d7f6e83e.MainActivity
+```
+
+**Troubleshooting:**
+- "device unauthorized": Check phone for USB debugging authorization prompt
+- "INSTALL_FAILED_UPDATE_INCOMPATIBLE": Run `adb uninstall com.gascounter.app` first
+- For detailed ADB instructions, see [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md#installing-on-device-via-adb)
 
 ### Running the App
 
-1. Connect an Android device via USB or start an Android emulator
-2. Enable USB debugging on your device
-3. Build and deploy using Visual Studio or the command line
-4. The app will request location permissions on first launch
+1. The app will request location permissions on first launch - grant "While using the app"
+2. Wait for GPS lock (may take 30 seconds outdoors)
+3. Map will auto-center on your location once GPS accuracy is good
+4. Tap ➕ to add your first counter
 
 ## Usage
 
