@@ -161,6 +161,14 @@ public class DatabaseService
             .CountAsync();
     }
 
+    public async Task<int> GetCountersByStateAsync(string state)
+    {
+        await InitializeAsync();
+        return await _database!.Table<GasCounter>()
+            .Where(c => c.State == state)
+            .CountAsync();
+    }
+
     public async Task<int> ResetAllChecksAsync()
     {
         await InitializeAsync();

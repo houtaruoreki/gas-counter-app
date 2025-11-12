@@ -15,7 +15,7 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="15"/>
                 </Border.StrokeShape>
-                <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
                     <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                            Text="სტატისტიკა"
                            FontSize="20"
@@ -51,6 +51,44 @@
                            FontSize="16"
                            FontAttributes="Bold"
                            TextColor="Red"
+                           HorizontalOptions="End"/>
+
+                    <BoxView Grid.Row="4" Grid.ColumnSpan="2"
+                             HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
+                             Margin="0,5,0,5"/>
+
+                    <Label Grid.Row="5" Grid.Column="0"
+                           Text="ნორმალური:"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>
+                    <Label Grid.Row="5" Grid.Column="1"
+                           x:Name="NormalCountersLabel"
+                           Text="0"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
+                           HorizontalOptions="End"/>
+
+                    <Label Grid.Row="6" Grid.Column="0"
+                           Text="გაჟონვა:"
+                           FontSize="14"
+                           TextColor="Red"/>
+                    <Label Grid.Row="6" Grid.Column="1"
+                           x:Name="LeakCountersLabel"
+                           Text="0"
+                           FontSize="14"
+                           TextColor="Red"
+                           HorizontalOptions="End"/>
+
+                    <Label Grid.Row="7" Grid.Column="0"
+                           Text="საჭიროებს რემონტს:"
+                           FontSize="14"
+                           TextColor="Orange"/>
+                    <Label Grid.Row="7" Grid.Column="1"
+                           x:Name="NeedsRepairCountersLabel"
+                           Text="0"
+                           FontSize="14"
+                           TextColor="Orange"
                            HorizontalOptions="End"/>
                 </Grid>
             </Border>
