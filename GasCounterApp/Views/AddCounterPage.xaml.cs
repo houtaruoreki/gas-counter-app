@@ -12,11 +12,17 @@ public partial class AddCounterPage : ContentPage
 
     public event EventHandler<GasCounter>? CounterSaved;
 
-    public AddCounterPage(double latitude, double longitude, double? accuracy)
+    // Constructor for DI (when used through service provider)
+    public AddCounterPage(DatabaseService databaseService) : this(databaseService, 0, 0, null)
+    {
+    }
+
+    // Constructor with parameters (when manually created with location)
+    public AddCounterPage(DatabaseService databaseService, double latitude, double longitude, double? accuracy)
     {
         InitializeComponent();
 
-        _databaseService = new DatabaseService();
+        _databaseService = databaseService;
         _latitude = latitude;
         _longitude = longitude;
         _accuracy = accuracy;

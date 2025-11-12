@@ -12,11 +12,17 @@ public partial class CounterDetailPage : ContentPage
     public event EventHandler? CounterUpdated;
     public event EventHandler? CounterDeleted;
 
-    public CounterDetailPage(int counterId)
+    // Constructor for DI (when used through service provider)
+    public CounterDetailPage(DatabaseService databaseService) : this(databaseService, 0)
+    {
+    }
+
+    // Constructor with parameters (when manually created with counter ID)
+    public CounterDetailPage(DatabaseService databaseService, int counterId)
     {
         InitializeComponent();
 
-        _databaseService = new DatabaseService();
+        _databaseService = databaseService;
         _counterId = counterId;
     }
 

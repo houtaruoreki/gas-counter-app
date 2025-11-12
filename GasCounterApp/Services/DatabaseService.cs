@@ -100,4 +100,18 @@ public class DatabaseService
         await InitializeAsync();
         return _dbPath;
     }
+
+    public async Task CloseDatabaseAsync()
+    {
+        if (_database != null)
+        {
+            await _database.CloseAsync();
+            _database = null;
+        }
+    }
+
+    public string GetDatabasePath()
+    {
+        return _dbPath;
+    }
 }

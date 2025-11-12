@@ -23,6 +23,12 @@ public static class MauiProgram
 		builder.Services.AddSingleton<LocationService>();
 		builder.Services.AddSingleton<BackupService>();
 
+		// Register pages for dependency injection
+		builder.Services.AddTransient<Views.MapPage>();
+		builder.Services.AddTransient<Views.DashboardPage>();
+		builder.Services.AddTransient<Views.AddCounterPage>();
+		builder.Services.AddTransient<Views.CounterDetailPage>();
+
 		// Initialize SQLite
 		SQLitePCL.Batteries_V2.Init();
 

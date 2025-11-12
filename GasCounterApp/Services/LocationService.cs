@@ -44,35 +44,51 @@ public class LocationService
         }
     }
 
-    public async Task<bool> StartListeningAsync(Action<Location, double?> onLocationChanged)
+    public async Task StartListeningAsync(Action<Location, double?> onLocationChanged, CancellationToken cancellationToken = default)
     {
         try
         {
             var request = new GeolocationRequest
             {
-                DesiredAccuracy = GeolocationAccuracy.Best,
+                DesiredAccuracy = GeolocationAccuracy.Medium, // Changed from Best to Medium for battery optimization
                 Timeout = TimeSpan.FromSeconds(10)
             };
 
-            // Start periodic location updates
-            while (true)
+            // Start periodic location updates with cancellation support
+            while (!cancellationToken.IsCancellationRequested)
             {
-                var location = await Geolocation.Default.GetLocationAsync(request);
-
-                if (location != null)
+                try
                 {
-                    _currentLocation = location;
-                    _currentAccuracy = location.Accuracy;
-                    onLocationChanged?.Invoke(location, location.Accuracy);
+                    var location = await Geolocation.Default.GetLocationAsync(request, cancellationToken);
+
+                    if (location != null)
+                    {
+                        _currentLocation = location;
+                        _currentAccuracy = location.Accuracy;
+                        onLocationChanged?.Invoke(location, location.Accuracy);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Expected when cancellation is requested
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error getting location update: {ex.Message}");
                 }
 
-                await Task.Delay(2000); // Update every 2 seconds
+                // Increased from 2 seconds to 5 seconds for better battery life
+                await Task.Delay(5000, cancellationToken);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when cancellation is requested
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error listening to location: {ex.Message}");
-            return false;
         }
     }
 
