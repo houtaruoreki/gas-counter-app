@@ -121,6 +121,21 @@ public partial class DashboardPage : ContentPage
         }
     }
 
+    private async void OnSearchResultTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Frame frame && frame.BindingContext is GasCounter counter)
+        {
+            var detailPage = new CounterDetailPage(_databaseService, counter.Id);
+            detailPage.CounterUpdated += (s, e) =>
+            {
+                CountersUpdated?.Invoke(this, EventArgs.Empty);
+                MainThread.BeginInvokeOnMainThread(async () => await UpdateStatisticsAsync());
+            };
+
+            await Navigation.PushAsync(detailPage);
+        }
+    }
+
     private async void OnResetCycleClicked(object sender, EventArgs e)
     {
         var confirm = await DisplayAlert(

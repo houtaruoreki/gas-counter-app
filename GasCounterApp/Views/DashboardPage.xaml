@@ -80,7 +80,15 @@
                         </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <Frame Padding="10" Margin="0,5" CornerRadius="10" HasShadow="False" BorderColor="LightGray">
+                                <Frame Padding="10"
+                                       Margin="0,5"
+                                       CornerRadius="10"
+                                       HasShadow="False"
+                                       BorderColor="LightGray"
+                                       BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnSearchResultTapped" />
+                                    </Frame.GestureRecognizers>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="3">
                                             <Label Text="{Binding CounterId, StringFormat='ID: {0}'}"
