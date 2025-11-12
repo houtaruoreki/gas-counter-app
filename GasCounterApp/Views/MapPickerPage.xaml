@@ -9,14 +9,53 @@
         <!-- Map View -->
         <mapsui:MapControl x:Name="MapView" />
 
-        <!-- Center Pin Icon (fixed in center of screen) -->
-        <Image Source="pin.png"
-               WidthRequest="48"
-               HeightRequest="48"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               Margin="0,0,0,24"
-               InputTransparent="True"/>
+        <!-- Center Pin Marker (fixed in center of screen) -->
+        <Grid HorizontalOptions="Center"
+              VerticalOptions="Center"
+              WidthRequest="60"
+              HeightRequest="60"
+              Margin="0,0,0,30"
+              InputTransparent="True">
+
+            <!-- Shadow/Outline -->
+            <Ellipse Fill="Black"
+                     Opacity="0.3"
+                     WidthRequest="16"
+                     HeightRequest="16"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center"/>
+
+            <!-- Center Dot -->
+            <Ellipse Fill="Red"
+                     Stroke="White"
+                     StrokeThickness="3"
+                     WidthRequest="12"
+                     HeightRequest="12"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center"/>
+
+            <!-- Crosshair Lines -->
+            <BoxView Color="Red"
+                     Opacity="0.8"
+                     WidthRequest="40"
+                     HeightRequest="2"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center"/>
+
+            <BoxView Color="Red"
+                     Opacity="0.8"
+                     WidthRequest="2"
+                     HeightRequest="40"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center"/>
+
+            <!-- Pin Icon using Label -->
+            <Label Text="📍"
+                   FontSize="36"
+                   HorizontalOptions="Center"
+                   VerticalOptions="End"
+                   Margin="0,0,0,-10"/>
+        </Grid>
 
         <!-- Coordinates Display -->
         <Border Padding="15"
