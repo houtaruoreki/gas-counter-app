@@ -10,7 +10,67 @@ public class DatabaseService
 
     public DatabaseService()
     {
-        _dbPath = Path.Combine(FileSystem.AppDataDirectory, "gascounters.db3");
+        // Store database in external storage so it persists after clearing app data
+        _dbPath = GetExternalDatabasePath();
+    }
+
+    private string GetExternalDatabasePath()
+    {
+        string externalPath;
+
+#if ANDROID
+        // Use Android's external storage Downloads directory
+        // This persists even after clearing app data
+        var downloadsPath = Android.OS.Environment.GetExternalStoragePublicDirectory(
+            Android.OS.Environment.DirectoryDownloads)?.AbsolutePath;
+
+        if (string.IsNullOrEmpty(downloadsPath))
+        {
+            // Fallback to external storage root + Downloads
+            var externalStorage = Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath;
+            downloadsPath = externalStorage != null
+                ? Path.Combine(externalStorage, "Download")
+                : FileSystem.AppDataDirectory;
+        }
+
+        // Create GasCounterApp folder in Downloads
+        externalPath = Path.Combine(downloadsPath, "GasCounterApp");
+#else
+        // For other platforms, use app data directory
+        externalPath = FileSystem.AppDataDirectory;
+#endif
+
+        // Ensure directory exists
+        if (!Directory.Exists(externalPath))
+        {
+            Directory.CreateDirectory(externalPath);
+        }
+
+        var dbPath = Path.Combine(externalPath, "gascounters.db3");
+
+        // Migrate old database if exists
+        MigrateOldDatabaseIfNeeded(dbPath);
+
+        return dbPath;
+    }
+
+    private void MigrateOldDatabaseIfNeeded(string newPath)
+    {
+        var oldPath = Path.Combine(FileSystem.AppDataDirectory, "gascounters.db3");
+
+        // If old database exists and new one doesn't, copy it
+        if (File.Exists(oldPath) && !File.Exists(newPath))
+        {
+            try
+            {
+                File.Copy(oldPath, newPath, false);
+                // Keep old database for safety - user can delete it manually if needed
+            }
+            catch
+            {
+                // If migration fails, continue with new path
+            }
+        }
     }
 
     private async Task InitializeAsync()

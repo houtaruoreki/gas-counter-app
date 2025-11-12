@@ -8,13 +8,38 @@ public class BackupService
     public BackupService(DatabaseService databaseService)
     {
         _databaseService = databaseService;
-        _backupDirectory = Path.Combine(FileSystem.AppDataDirectory, "Backups");
+        _backupDirectory = GetExternalBackupDirectory();
 
         // Ensure backup directory exists
         if (!Directory.Exists(_backupDirectory))
         {
             Directory.CreateDirectory(_backupDirectory);
         }
+    }
+
+    private string GetExternalBackupDirectory()
+    {
+#if ANDROID
+        // Use Android's external storage Downloads directory
+        // This persists even after clearing app data
+        var downloadsPath = Android.OS.Environment.GetExternalStoragePublicDirectory(
+            Android.OS.Environment.DirectoryDownloads)?.AbsolutePath;
+
+        if (string.IsNullOrEmpty(downloadsPath))
+        {
+            // Fallback to external storage root + Downloads
+            var externalStorage = Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath;
+            downloadsPath = externalStorage != null
+                ? Path.Combine(externalStorage, "Download")
+                : FileSystem.AppDataDirectory;
+        }
+
+        // Create GasCounterApp/Backups folder in Downloads
+        return Path.Combine(downloadsPath, "GasCounterApp", "Backups");
+#else
+        // For other platforms, use app data directory
+        return Path.Combine(FileSystem.AppDataDirectory, "Backups");
+#endif
     }
 
     public async Task<bool> CreateBackupAsync()
