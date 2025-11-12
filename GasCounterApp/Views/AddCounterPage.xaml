@@ -12,7 +12,7 @@
                    CornerRadius="10"
                    Padding="15"
                    HasShadow="True">
-                <VerticalStackLayout Spacing="5">
+                <VerticalStackLayout Spacing="10">
                     <Label Text="მდებარეობა"
                            FontSize="16"
                            FontAttributes="Bold"/>
@@ -26,6 +26,15 @@
                            Text="სიზუსტე: -"
                            FontSize="14"
                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+
+                    <Button x:Name="PickLocationButton"
+                            Text="📍 არჩევა რუკაზე"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                            TextColor="{DynamicResource Primary}"
+                            FontSize="14"
+                            HeightRequest="40"
+                            CornerRadius="8"
+                            Clicked="OnPickLocationClicked"/>
                 </VerticalStackLayout>
             </Frame>
 

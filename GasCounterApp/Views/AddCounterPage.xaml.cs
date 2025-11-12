@@ -6,9 +6,9 @@ namespace GasCounterApp.Views;
 public partial class AddCounterPage : ContentPage
 {
     private readonly DatabaseService _databaseService;
-    private readonly double _latitude;
-    private readonly double _longitude;
-    private readonly double? _accuracy;
+    private double _latitude;
+    private double _longitude;
+    private double? _accuracy;
 
     public event EventHandler<GasCounter>? CounterSaved;
 
@@ -46,10 +46,46 @@ public partial class AddCounterPage : ContentPage
             else
                 AccuracyLabel.TextColor = Colors.Red;
         }
+        else if (_latitude != 0 && _longitude != 0)
+        {
+            AccuracyLabel.Text = "სიზუსტე: ხელით შერჩეული";
+            AccuracyLabel.TextColor = Colors.Blue;
+        }
         else
         {
             AccuracyLabel.Text = "სიზუსტე: მიუწვდომელი";
             AccuracyLabel.TextColor = Colors.Gray;
+        }
+    }
+
+    private async void OnPickLocationClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            // Use current location as initial position, or default to Tbilisi if not set
+            var initialLat = _latitude != 0 ? _latitude : 41.7151;
+            var initialLon = _longitude != 0 ? _longitude : 44.8271;
+
+            var mapPickerPage = new MapPickerPage(initialLat, initialLon);
+            mapPickerPage.LocationSelected += (s, coords) =>
+            {
+                // Update the location
+                _latitude = coords.Latitude;
+                _longitude = coords.Longitude;
+                _accuracy = null; // Manual selection, no GPS accuracy
+
+                // Update UI
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    InitializeLocationInfo();
+                });
+            };
+
+            await Navigation.PushAsync(mapPickerPage);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("შეცდომა", $"რუკის გახსნა ვერ მოხერხდა: {ex.Message}", "OK");
         }
     }
 
