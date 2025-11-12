@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GasCounterApp.Views.CounterDetailPage"
+             Title="მრიცხველის დეტალები">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Location Info -->
+            <Frame BorderColor="{DynamicResource Primary}"
+                   CornerRadius="10"
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="მდებარეობა"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label x:Name="LatitudeLabel"
+                           FontSize="14"/>
+                    <Label x:Name="LongitudeLabel"
+                           FontSize="14"/>
+                    <Label x:Name="AccuracyLabel"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Check Status -->
+            <Frame BorderColor="LightGray"
+                   CornerRadius="10"
+                   Padding="15"
+                   HasShadow="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <VerticalStackLayout Grid.Column="0" Spacing="3">
+                        <Label Text="შემოწმების სტატუსი"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+                        <Label x:Name="CheckStatusLabel"
+                               FontSize="14"/>
+                        <Label x:Name="LastCheckedLabel"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+                    </VerticalStackLayout>
+
+                    <Switch x:Name="CheckedSwitch"
+                            Grid.Column="1"
+                            VerticalOptions="Center"
+                            Toggled="OnCheckedToggled"/>
+                </Grid>
+            </Frame>
+
+            <!-- Counter ID -->
+            <Label Text="მრიცხველის ID"
+                   FontSize="14"/>
+            <Entry x:Name="CounterIdEntry"
+                   Placeholder="არასავალდებულო"
+                   Keyboard="Text"/>
+
+            <!-- Customer Name -->
+            <Label Text="აბონენტის სახელი"
+                   FontSize="14"/>
+            <Entry x:Name="CustomerNameEntry"
+                   Placeholder="არასავალდებულო"
+                   Keyboard="Text"/>
+
+            <!-- Street Name -->
+            <Label Text="ქუჩის სახელი"
+                   FontSize="14"/>
+            <Entry x:Name="StreetNameEntry"
+                   Placeholder="არასავალდებულო"
+                   Keyboard="Text"/>
+
+            <!-- State/Condition -->
+            <Label Text="მდგომარეობა"
+                   FontSize="14"/>
+            <Picker x:Name="StatePicker"
+                    Title="აირჩიეთ მდგომარეობა">
+                <Picker.Items>
+                    <x:String>ნორმალური</x:String>
+                    <x:String>გაჟონვა</x:String>
+                    <x:String>საჭიროებს რემონტს</x:String>
+                    <x:String>დაზიანებული</x:String>
+                    <x:String>შესანაწავი</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <!-- Notes -->
+            <Label Text="შენიშვნები"
+                   FontSize="14"/>
+            <Editor x:Name="NotesEditor"
+                    Placeholder="დამატებითი ინფორმაცია..."
+                    HeightRequest="100"/>
+
+            <!-- Created/Modified Info -->
+            <Frame BorderColor="LightGray"
+                   CornerRadius="10"
+                   Padding="15"
+                   HasShadow="False"
+                   BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryBackground}, Dark={StaticResource SecondaryBackgroundDark}}">
+                <VerticalStackLayout Spacing="3">
+                    <Label x:Name="CreatedLabel"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+                    <Label x:Name="ModifiedLabel"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,10,0,0">
+                <Button Grid.Column="0"
+                        x:Name="SaveButton"
+                        Text="შენახვა"
+                        BackgroundColor="{DynamicResource Primary}"
+                        TextColor="White"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="50"
+                        CornerRadius="10"
+                        Clicked="OnSaveClicked"/>
+
+                <Button Grid.Column="1"
+                        x:Name="DeleteButton"
+                        Text="წაშლა"
+                        BackgroundColor="Red"
+                        TextColor="White"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="50"
+                        CornerRadius="10"
+                        Clicked="OnDeleteClicked"/>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

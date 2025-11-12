@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
+             x:Class="GasCounterApp.Views.MapPage"
+             Title="რუკა">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Map View -->
+        <mapsui:MapControl x:Name="MapView"
+                          Grid.Row="0"
+                          BackgroundColor="{AppThemeBinding Light=LightGray, Dark=#1a1a1a}" />
+
+        <!-- Bottom Action Bar -->
+        <Grid Grid.Row="1"
+              BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceColor}, Dark={StaticResource SurfaceColorDark}}"
+              Padding="16,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- My Location Button -->
+            <Button Grid.Column="0"
+                    x:Name="MyLocationButton"
+                    Text="📍"
+                    FontSize="20"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    Clicked="OnMyLocationClicked"
+                    Margin="0,0,8,0"/>
+
+            <!-- Counter Stats -->
+            <VerticalStackLayout Grid.Column="1"
+                                Spacing="2"
+                                VerticalOptions="Center"
+                                Margin="8,0">
+                <Label x:Name="StatsLabel"
+                       Text="0/0 შემოწმებული"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource TextColor}, Dark={StaticResource TextColorDark}}"/>
+                <Label x:Name="AccuracyLabel"
+                       Text="GPS: მიუწვდომელი"
+                       FontSize="12"
+                       TextColor="{AppThemeBinding Light=Gray, Dark=LightGray}"/>
+            </VerticalStackLayout>
+
+            <!-- Add Counter Button -->
+            <Button Grid.Column="2"
+                    x:Name="AddCounterButton"
+                    Text="➕"
+                    FontSize="24"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    BackgroundColor="{DynamicResource Primary}"
+                    TextColor="White"
+                    Clicked="OnAddCounterClicked"
+                    Margin="8,0"/>
+
+            <!-- Dashboard Button -->
+            <Button Grid.Column="3"
+                    x:Name="DashboardButton"
+                    Text="☰"
+                    FontSize="20"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    Clicked="OnDashboardClicked"
+                    Margin="8,0,0,0"/>
+        </Grid>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator x:Name="LoadingIndicator"
+                          Grid.Row="0"
+                          IsRunning="False"
+                          IsVisible="False"
+                          Color="{DynamicResource Primary}"
+                          WidthRequest="50"
+                          HeightRequest="50"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"/>
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet:*)",
+      "Bash(\"C:\\Users\\lmagh\\Downloads\\platform-tools-latest-windows\\platform-tools\\adb.exe\" install \"C:\\Users\\lmagh\\Documents\\socar\\GasCounterApp\\bin\\Release\\net9.0-android\\com.gascounter.app-Signed.apk\")",
+      "Bash(\"C:\\Users\\lmagh\\Downloads\\platform-tools-latest-windows\\platform-tools\\adb.exe\" install -r \"C:\\Users\\lmagh\\Documents\\socar\\GasCounterApp\\bin\\Release\\net9.0-android\\com.gascounter.app-Signed.apk\")",
+      "Bash(\"C:\\Users\\lmagh\\Downloads\\platform-tools-latest-windows\\platform-tools\\adb.exe\" logcat -c)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

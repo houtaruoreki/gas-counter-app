@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GasCounterApp.Views.AddCounterPage"
+             Title="მრიცხველის დამატება">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Location Info -->
+            <Frame BorderColor="{DynamicResource Primary}"
+                   CornerRadius="10"
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="მდებარეობა"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label x:Name="LatitudeLabel"
+                           Text="გრძედი: -"
+                           FontSize="14"/>
+                    <Label x:Name="LongitudeLabel"
+                           Text="განედი: -"
+                           FontSize="14"/>
+                    <Label x:Name="AccuracyLabel"
+                           Text="სიზუსტე: -"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Counter ID (Optional) -->
+            <Label Text="მრიცხველის ID (არასავალდებულო)"
+                   FontSize="14"/>
+            <Entry x:Name="CounterIdEntry"
+                   Placeholder="მაგ: 12345"
+                   Keyboard="Text"/>
+
+            <!-- Customer Name (Optional) -->
+            <Label Text="აბონენტის სახელი (არასავალდებულო)"
+                   FontSize="14"/>
+            <Entry x:Name="CustomerNameEntry"
+                   Placeholder="მაგ: გიორგი გელაშვილი"
+                   Keyboard="Text"/>
+
+            <!-- Street Name (Optional) -->
+            <Label Text="ქუჩის სახელი (არასავალდებულო)"
+                   FontSize="14"/>
+            <Entry x:Name="StreetNameEntry"
+                   Placeholder="მაგ: რუსთაველის გამზირი"
+                   Keyboard="Text"/>
+
+            <!-- State/Condition -->
+            <Label Text="მდგომარეობა (არასავალდებულო)"
+                   FontSize="14"/>
+            <Picker x:Name="StatePicker"
+                    Title="აირჩიეთ მდგომარეობა">
+                <Picker.Items>
+                    <x:String>ნორმალური</x:String>
+                    <x:String>გაჟონვა</x:String>
+                    <x:String>საჭიროებს რემონტს</x:String>
+                    <x:String>დაზიანებული</x:String>
+                    <x:String>შესანაწავი</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <!-- Notes -->
+            <Label Text="შენიშვნები (არასავალდებულო)"
+                   FontSize="14"/>
+            <Editor x:Name="NotesEditor"
+                    Placeholder="დამატებითი ინფორმაცია..."
+                    HeightRequest="100"/>
+
+            <!-- Save Button -->
+            <Button x:Name="SaveButton"
+                    Text="შენახვა"
+                    BackgroundColor="{DynamicResource Primary}"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="10"
+                    Margin="0,20,0,0"
+                    Clicked="OnSaveClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

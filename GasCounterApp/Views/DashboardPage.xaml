@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GasCounterApp.Views.DashboardPage"
+             Title="მართვის პანელი">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- Statistics Card -->
+            <Frame BorderColor="{DynamicResource Primary}"
+                   CornerRadius="15"
+                   Padding="20"
+                   HasShadow="True">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
+                    <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                           Text="სტატისტიკა"
+                           FontSize="20"
+                           FontAttributes="Bold"/>
+
+                    <Label Grid.Row="1" Grid.Column="0"
+                           Text="სულ მრიცხველი:"
+                           FontSize="16"/>
+                    <Label Grid.Row="1" Grid.Column="1"
+                           x:Name="TotalCountersLabel"
+                           Text="0"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           HorizontalOptions="End"/>
+
+                    <Label Grid.Row="2" Grid.Column="0"
+                           Text="შემოწმებული:"
+                           FontSize="16"/>
+                    <Label Grid.Row="2" Grid.Column="1"
+                           x:Name="CheckedCountersLabel"
+                           Text="0"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="Green"
+                           HorizontalOptions="End"/>
+
+                    <Label Grid.Row="3" Grid.Column="0"
+                           Text="დარჩენილი:"
+                           FontSize="16"/>
+                    <Label Grid.Row="3" Grid.Column="1"
+                           x:Name="RemainingCountersLabel"
+                           Text="0"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="Red"
+                           HorizontalOptions="End"/>
+                </Grid>
+            </Frame>
+
+            <!-- Search Section -->
+            <Frame BorderColor="LightGray"
+                   CornerRadius="15"
+                   Padding="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="ძებნა ID-ით"
+                           FontSize="18"
+                           FontAttributes="Bold"/>
+
+                    <Entry x:Name="SearchEntry"
+                           Placeholder="შეიყვანეთ მრიცხველის ID"
+                           Keyboard="Text"
+                           TextChanged="OnSearchTextChanged"/>
+
+                    <CollectionView x:Name="SearchResultsView"
+                                   SelectionMode="Single"
+                                   SelectionChanged="OnSearchResultSelected"
+                                   HeightRequest="200">
+                        <CollectionView.EmptyView>
+                            <Label Text="შედეგები არ მოიძებნა"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   Margin="0,20,0,0"/>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="10" Margin="0,5" CornerRadius="10" HasShadow="False" BorderColor="LightGray">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                            <Label Text="{Binding CounterId, StringFormat='ID: {0}'}"
+                                                   FontAttributes="Bold"/>
+                                            <Label Text="{Binding CustomerName, StringFormat='აბონენტი: {0}'}"
+                                                   FontSize="12"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+                                            <Label Text="{Binding StreetName, StringFormat='ქუჩა: {0}'}"
+                                                   FontSize="12"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding IsChecked, Converter={StaticResource CheckmarkConverter}}"
+                                               FontSize="24"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Cycle Management Section -->
+            <Frame BorderColor="Orange"
+                   CornerRadius="15"
+                   Padding="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="შემოწმების ციკლი"
+                           FontSize="18"
+                           FontAttributes="Bold"/>
+
+                    <Label x:Name="CycleStatusLabel"
+                           Text="მიმდინარე ციკლი: 0/0 შემოწმებული"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+
+                    <Button x:Name="ResetCycleButton"
+                            Text="ახალი ციკლის დაწყება"
+                            BackgroundColor="Orange"
+                            TextColor="White"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            HeightRequest="50"
+                            CornerRadius="10"
+                            Clicked="OnResetCycleClicked"/>
+
+                    <Label Text="გაფრთხილება: ყველა მრიცხველი მონიშნული იქნება როგორც არაშემოწმებული"
+                           FontSize="12"
+                           TextColor="Red"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Backup Section -->
+            <Frame BorderColor="Purple"
+                   CornerRadius="15"
+                   Padding="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="სარეზერვო კოპია"
+                           FontSize="18"
+                           FontAttributes="Bold"/>
+
+                    <Label x:Name="LastBackupLabel"
+                           Text="ბოლო კოპია: არასოდეს"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Grid.Column="0"
+                                x:Name="CreateBackupButton"
+                                Text="კოპირება"
+                                BackgroundColor="Purple"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="50"
+                                CornerRadius="10"
+                                Clicked="OnCreateBackupClicked"/>
+
+                        <Button Grid.Column="1"
+                                x:Name="ViewBackupsButton"
+                                Text="კოპიების ნახვა"
+                                BackgroundColor="Purple"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="50"
+                                CornerRadius="10"
+                                Clicked="OnViewBackupsClicked"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
