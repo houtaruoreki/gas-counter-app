@@ -95,12 +95,21 @@ public partial class MapPage : ContentPage
         MapView.Info += OnMapInfo;
     }
 
-    private async void OnMapInfo(object? sender, Mapsui.UI.MapInfoEventArgs e)
+ private async void OnMapInfo(object? sender, MapInfoEventArgs e)
+{
+    var map = MapView.Map;
+    if (map == null || _countersLayer == null)
+        return;
+
+    try
     {
-        if (e.MapInfo?.Feature == null)
+        // Get MapInfo for the counters layer only
+        var mapInfo = e.GetMapInfo(new[] { (Mapsui.Layers.ILayer)_countersLayer });
+
+        if (mapInfo?.Feature == null)
             return;
 
-        var feature = e.MapInfo.Feature;
+        var feature = mapInfo.Feature;
 
         // Check if this is a counter feature
         if (feature["CounterId"] is int counterId)
@@ -111,7 +120,15 @@ public partial class MapPage : ContentPage
                 await ShowCounterPopupAsync(counter);
             }
         }
+
+        // Mark event as handled
+        e.Handled = true;
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error handling map info: {ex.Message}");
+    }
+}
 
     private async Task LoadCountersAsync()
     {
