@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
+             x:Class="GasCounterApp.Views.MapPickerPage"
+             Title="მდებარეობის არჩევა">
+
+    <Grid>
+        <!-- Map View -->
+        <mapsui:MapControl x:Name="MapView" />
+
+        <!-- Center Pin Icon (fixed in center of screen) -->
+        <Image Source="pin.png"
+               WidthRequest="48"
+               HeightRequest="48"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               Margin="0,0,0,24"
+               InputTransparent="True"/>
+
+        <!-- Coordinates Display -->
+        <Border Padding="15"
+                Margin="10,10,10,0"
+                BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}"
+                StrokeThickness="1"
+                Stroke="{DynamicResource Primary}"
+                HorizontalOptions="Center"
+                VerticalOptions="Start">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10"/>
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="5">
+                <Label x:Name="CoordinatesLabel"
+                       Text="გრძედი: 0.000000, განედი: 0.000000"
+                       FontSize="12"
+                       HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Confirm Button -->
+        <Border Padding="0"
+                Margin="20,0,20,20"
+                HorizontalOptions="Fill"
+                VerticalOptions="End">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10"/>
+            </Border.StrokeShape>
+            <Button x:Name="ConfirmButton"
+                    Text="✓ დადასტურება"
+                    BackgroundColor="{DynamicResource Primary}"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="10"
+                    Clicked="OnConfirmClicked"/>
+        </Border>
+    </Grid>
+
+</ContentPage>

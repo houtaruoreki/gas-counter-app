@@ -39,9 +39,19 @@ public partial class DashboardPage : ContentPage
         var checked_count = await _databaseService.GetCheckedCountersAsync();
         var remaining = total - checked_count;
 
+        // Get counts by state
+        var normalCount = await _databaseService.GetCountersByStateAsync("ნორმალური");
+        var leakCount = await _databaseService.GetCountersByStateAsync("გაჟონვა");
+        var needsRepairCount = await _databaseService.GetCountersByStateAsync("საჭიროებს რემონტს");
+
         TotalCountersLabel.Text = total.ToString();
         CheckedCountersLabel.Text = checked_count.ToString();
         RemainingCountersLabel.Text = remaining.ToString();
+
+        // Update state labels
+        NormalCountersLabel.Text = normalCount.ToString();
+        LeakCountersLabel.Text = leakCount.ToString();
+        NeedsRepairCountersLabel.Text = needsRepairCount.ToString();
 
         CycleStatusLabel.Text = $"მიმდინარე ციკლი: {checked_count}/{total} შემოწმებული";
 
@@ -123,7 +133,7 @@ public partial class DashboardPage : ContentPage
 
     private async void OnSearchResultTapped(object sender, TappedEventArgs e)
     {
-        if (sender is Frame frame && frame.BindingContext is GasCounter counter)
+        if (sender is Border border && border.BindingContext is GasCounter counter)
         {
             var detailPage = new CounterDetailPage(_databaseService, counter.Id);
             detailPage.CounterUpdated += (s, e) =>
