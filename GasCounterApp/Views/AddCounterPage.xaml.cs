@@ -59,16 +59,30 @@ public partial class AddCounterPage : ContentPage
         {
             SaveButton.IsEnabled = false;
 
+            var counterId = string.IsNullOrWhiteSpace(CounterIdEntry.Text) ? null : CounterIdEntry.Text.Trim();
+
+            // Check for unique Counter ID if provided
+            if (!string.IsNullOrWhiteSpace(counterId))
+            {
+                var isUnique = await _databaseService.IsCounterIdUniqueAsync(counterId);
+                if (!isUnique)
+                {
+                    await DisplayAlert("შეცდომა", $"მრიცხველის ID '{counterId}' უკვე არსებობს. გთხოვთ გამოიყენოთ უნიკალური ID.", "OK");
+                    SaveButton.IsEnabled = true;
+                    return;
+                }
+            }
+
             var counter = new GasCounter
             {
-                CounterId = string.IsNullOrWhiteSpace(CounterIdEntry.Text) ? null : CounterIdEntry.Text,
-                CustomerName = string.IsNullOrWhiteSpace(CustomerNameEntry.Text) ? null : CustomerNameEntry.Text,
-                StreetName = string.IsNullOrWhiteSpace(StreetNameEntry.Text) ? null : StreetNameEntry.Text,
+                CounterId = counterId,
+                CustomerName = string.IsNullOrWhiteSpace(CustomerNameEntry.Text) ? null : CustomerNameEntry.Text.Trim(),
+                StreetName = string.IsNullOrWhiteSpace(StreetNameEntry.Text) ? null : StreetNameEntry.Text.Trim(),
                 Latitude = _latitude,
                 Longitude = _longitude,
                 GpsAccuracy = _accuracy,
                 State = StatePicker.SelectedIndex >= 0 ? StatePicker.Items[StatePicker.SelectedIndex] : null,
-                Notes = string.IsNullOrWhiteSpace(NotesEditor.Text) ? null : NotesEditor.Text
+                Notes = string.IsNullOrWhiteSpace(NotesEditor.Text) ? null : NotesEditor.Text.Trim()
             };
 
             await _databaseService.SaveCounterAsync(counter);

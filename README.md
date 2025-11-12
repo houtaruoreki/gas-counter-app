@@ -76,11 +76,27 @@ GasCounterApp/
 ### Prerequisites
 
 - .NET 9.0 SDK
-- Visual Studio 2022 or Visual Studio Code
+- Visual Studio 2022 (with MAUI workload) **OR** .NET CLI
 - Android SDK (API 21 or higher)
 - Android device or emulator
 
 ### Building the Project
+
+#### Option 1: Visual Studio 2022 (Recommended for Windows)
+
+**Quick Start:**
+1. Open `socar.sln` in Visual Studio 2022
+2. Ensure you have the **.NET MAUI workload** installed
+3. Connect your Android device via USB (or start emulator)
+4. Enable USB Debugging on device
+5. Select **Release** configuration from toolbar
+6. Select your device from the device dropdown
+7. Press **F5** (or click the green play button)
+8. App will build, deploy, and launch automatically!
+
+**For detailed instructions**, see [VISUAL_STUDIO_BUILD_GUIDE.md](VISUAL_STUDIO_BUILD_GUIDE.md)
+
+#### Option 2: Command Line (.NET CLI)
 
 ```bash
 # Clone the repository
