@@ -11,35 +11,61 @@ public class BackupService
         _backupDirectory = GetExternalBackupDirectory();
 
         // Ensure backup directory exists
-        if (!Directory.Exists(_backupDirectory))
+        try
         {
-            Directory.CreateDirectory(_backupDirectory);
+            if (!Directory.Exists(_backupDirectory))
+            {
+                Directory.CreateDirectory(_backupDirectory);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to create backup directory: {ex.Message}");
+            // Directory will be created later when needed
         }
     }
 
     private string GetExternalBackupDirectory()
     {
-#if ANDROID
-        // Use Android's external storage Downloads directory
-        // This persists even after clearing app data
-        var downloadsPath = Android.OS.Environment.GetExternalStoragePublicDirectory(
-            Android.OS.Environment.DirectoryDownloads)?.AbsolutePath;
-
-        if (string.IsNullOrEmpty(downloadsPath))
+        try
         {
-            // Fallback to external storage root + Downloads
-            var externalStorage = Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath;
-            downloadsPath = externalStorage != null
-                ? Path.Combine(externalStorage, "Download")
-                : FileSystem.AppDataDirectory;
-        }
+#if ANDROID
+            // Use Android's external storage Downloads directory
+            // This persists even after clearing app data
+            var downloadsPath = Android.OS.Environment.GetExternalStoragePublicDirectory(
+                Android.OS.Environment.DirectoryDownloads)?.AbsolutePath;
 
-        // Create GasCounterApp/Backups folder in Downloads
-        return Path.Combine(downloadsPath, "GasCounterApp", "Backups");
+            if (string.IsNullOrEmpty(downloadsPath))
+            {
+                // Fallback to external storage root + Downloads
+                var externalStorage = Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath;
+                downloadsPath = externalStorage != null
+                    ? Path.Combine(externalStorage, "Download")
+                    : null;
+            }
+
+            // If we got a valid downloads path, use it
+            if (!string.IsNullOrEmpty(downloadsPath))
+            {
+                return Path.Combine(downloadsPath, "GasCounterApp", "Backups");
+            }
+            else
+            {
+                // Fallback to app data directory
+                return Path.Combine(FileSystem.AppDataDirectory, "Backups");
+            }
 #else
-        // For other platforms, use app data directory
-        return Path.Combine(FileSystem.AppDataDirectory, "Backups");
+            // For other platforms, use app data directory
+            return Path.Combine(FileSystem.AppDataDirectory, "Backups");
 #endif
+        }
+        catch (Exception ex)
+        {
+            // If anything fails, fall back to app data directory
+            Console.WriteLine($"Failed to initialize external storage backup path: {ex.Message}");
+            Console.WriteLine("Falling back to app data directory");
+            return Path.Combine(FileSystem.AppDataDirectory, "Backups");
+        }
     }
 
     public async Task<bool> CreateBackupAsync()

@@ -42,6 +42,9 @@ public partial class MapPage : ContentPage
     {
         base.OnAppearing();
 
+        // Request storage permissions for external database access
+        await RequestStoragePermissionsAsync();
+
         // Run independent operations in parallel for faster loading
         var loadCountersTask = LoadCountersAsync();
         var updateStatsTask = UpdateStatsAsync();
@@ -54,6 +57,33 @@ public partial class MapPage : ContentPage
 
         // Auto-recenter to user's location when opening the app
         await RecenterToUserLocationAsync();
+    }
+
+    private async Task RequestStoragePermissionsAsync()
+    {
+        try
+        {
+            // Request storage permissions for accessing external storage
+            var status = await Permissions.CheckStatusAsync<Permissions.StorageWrite>();
+
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.StorageWrite>();
+            }
+
+            // Also request read permissions
+            var readStatus = await Permissions.CheckStatusAsync<Permissions.StorageRead>();
+
+            if (readStatus != PermissionStatus.Granted)
+            {
+                readStatus = await Permissions.RequestAsync<Permissions.StorageRead>();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Permissions might not be available or already granted
+            Console.WriteLine($"Storage permission request failed: {ex.Message}");
+        }
     }
 
     protected override void OnDisappearing()
